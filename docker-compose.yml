@@ -1,0 +1,86 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - PAARI_ENV=${PAARI_ENV:-sandbox}
+      - PAARI_KYB_SIMULATION=${PAARI_KYB_SIMULATION:-0}
+      - PAARI_REQUIRE_MTLS_INGRESS=${PAARI_REQUIRE_MTLS_INGRESS:-0}
+      - DATABASE_URL=postgresql+psycopg://paari:${PAARI_POSTGRES_PASSWORD:?Set PAARI_POSTGRES_PASSWORD in .env}@db:5432/paari
+      - ALEMBIC_URL=postgresql+psycopg://paari:${PAARI_POSTGRES_PASSWORD:?Set PAARI_POSTGRES_PASSWORD in .env}@db:5432/paari
+      - PAARI_BENEFICIARY_HASH_SECRET=${PAARI_BENEFICIARY_HASH_SECRET:?Set PAARI_BENEFICIARY_HASH_SECRET in .env}
+      # v3.6 onboarding and v3.7 enterprise risk fail closed without these
+      # independently provisioned secrets (each 32+ characters).
+      - PAARI_V36_KEY_ENCRYPTION_SECRET=${PAARI_V36_KEY_ENCRYPTION_SECRET:?Set PAARI_V36_KEY_ENCRYPTION_SECRET in .env}
+      - PAARI_V36_PII_HMAC_SECRET=${PAARI_V36_PII_HMAC_SECRET:?Set PAARI_V36_PII_HMAC_SECRET in .env}
+      - PAARI_V36_AUTH_SECRET=${PAARI_V36_AUTH_SECRET:?Set PAARI_V36_AUTH_SECRET in .env}
+      - PAARI_V37_DATA_ENCRYPTION_SECRET=${PAARI_V37_DATA_ENCRYPTION_SECRET:?Set PAARI_V37_DATA_ENCRYPTION_SECRET in .env}
+      - PAARI_ADMIN_API_KEY=${PAARI_ADMIN_API_KEY:-}
+      - PAARI_SIGNING_BACKEND=${PAARI_SIGNING_BACKEND:-local_pem}
+      - PAARI_SIGNING_ADAPTER=${PAARI_SIGNING_ADAPTER:-}
+      - PAARI_SIGNING_KEY_ID=${PAARI_SIGNING_KEY_ID:-paari-1}
+      - PAARI_SIGNING_KEY_PATH=/app/secrets/paari_signing_key.pem
+      # The persistent Compose service defaults to strict autonomous mandate
+      # enforcement. Do not weaken these for the real-service E2E test; use the
+      # explicit limited sandbox option only against a separately launched service.
+      - PAARI_MODE=autonomous
+      - PAARI_CONTROL_PLANE_ENFORCEMENT=1
+      - PAARI_RECEIVER_ENFORCEMENT=1
+      - PAARI_FEDERATION_ENFORCEMENT=1
+      - PAARI_REQUIRE_SIGNED_MANDATE=1
+      - PAARI_REQUIRE_USER_MANDATE=1
+      - PAARI_REQUIRE_SAFR_ENVELOPE=1
+      - PAARI_IDENTITY_PROVIDER_ADAPTER=${PAARI_IDENTITY_PROVIDER_ADAPTER:-}
+      - PAARI_TRUSTED_IDENTITY_PROVIDER_IDS=${PAARI_TRUSTED_IDENTITY_PROVIDER_IDS:-}
+      - PAARI_RECONCILE_INTERVAL=${PAARI_RECONCILE_INTERVAL:-60}
+      - PAARI_RECONCILE_DEAD_LETTER_AFTER=${PAARI_RECONCILE_DEAD_LETTER_AFTER:-5}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}
+      - RAZORPAY_API_BASE=${RAZORPAY_API_BASE:-https://api.razorpay.com/v1}
+      - MASTERCARD_ENABLED=${MASTERCARD_ENABLED:-false}
+      - MASTERCARD_ENV=${MASTERCARD_ENV:-sandbox}
+      - MASTERCARD_API_BASE_URL=${MASTERCARD_API_BASE_URL:-https://api.finicity.com}
+      - MASTERCARD_PARTNER_ID=${MASTERCARD_PARTNER_ID:-}
+      - MASTERCARD_PARTNER_SECRET=${MASTERCARD_PARTNER_SECRET:-}
+      - MASTERCARD_APP_KEY=${MASTERCARD_APP_KEY:-}
+      - SETU_AA_ENABLED=${SETU_AA_ENABLED:-false}
+      - SETU_AA_ENV=${SETU_AA_ENV:-sandbox}
+      - SETU_AA_AUTH_BASE_URL=${SETU_AA_AUTH_BASE_URL:-https://uat.setu.co/api/v2}
+      - SETU_AA_BASE_URL=${SETU_AA_BASE_URL:-https://fiu-sandbox.setu.co/v2}
+      - SETU_AA_CLIENT_ID=${SETU_AA_CLIENT_ID:-}
+      - SETU_AA_CLIENT_SECRET=${SETU_AA_CLIENT_SECRET:-}
+      - SETU_AA_PRODUCT_INSTANCE_ID=${SETU_AA_PRODUCT_INSTANCE_ID:-}
+    volumes:
+      - signing_keys:/app/secrets
+      - paari_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=paari
+      - POSTGRES_PASSWORD=${PAARI_POSTGRES_PASSWORD:?Set PAARI_POSTGRES_PASSWORD in .env}
+      - POSTGRES_DB=paari
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paari -d paari"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  signing_keys:
+  paari_data:

@@ -1,0 +1,23 @@
+# Optional real local PostgreSQL for Paari v3.0. Database only; backend and portal
+# are deliberately bound to host loopback via scripts/start_local_demo.py.
+# Not for deployment. Supply an independent local password in ignored .env.
+# Existing PostgreSQL volumes retain their old role password until explicitly rotated.
+services:
+  local-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: paari_demo
+      POSTGRES_USER: paari
+      POSTGRES_PASSWORD: ${PAARI_POSTGRES_PASSWORD:?Set PAARI_POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5439:5432"
+    volumes:
+      - paari_demo_pgdata:/var/lib/postgresql/data
+      - ./docker/local_postgres_init.sql:/docker-entrypoint-initdb.d/01-local-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paari -d paari_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+volumes:
+  paari_demo_pgdata:

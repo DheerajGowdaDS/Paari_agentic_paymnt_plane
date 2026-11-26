@@ -1,0 +1,67 @@
+# Runtime secrets and state. paari_signing_key.pem is an UNENCRYPTED Ed25519
+# private key: committing it would let anyone mint Paari-issued credentials,
+# and every token issued under the committed key stays forgeable forever.
+*.pem
+*.key
+
+# Databases (runtime + test fixtures)
+*.db
+*.db-journal
+*.db.pre-*
+
+# Local secret files (live E2E / deployment env)
+.env
+.env.*
+# ...except the two files that must be shared: `.env.example` is what a
+# contributor copies, and `.env.test` is the suite's declared baseline. A
+# gitignored test configuration is a file that only exists on one machine.
+!.env.example
+!.env.production.example
+!.env.test
+*_env.ps1
+
+# Runtime server logs (regenerated on every local run)
+*.log
+
+# Tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.benchmarks/
+.mimocode/
+.perch/
+
+# Local-only: these carry a real Razorpay test key id and stay out of the repo
+/checkout_pay.html
+/evidence_live_e2e_2026-09-19.md
+
+# Virtualenvs
+venv/
+.venv/
+# Temporary local overrides can expose host DB ports or trial-only services.
+docker-compose.override.yml
+*.override.yml
+
+# Operator-only live E2E artifacts; may contain test-agent keys, JWTs, IDs, or webhook data.
+.agnes/
+live_state.json
+*_live_state.json
+final_state.txt
+audit_chain.txt
+verify_server.txt
+verify_proof.txt
+
+# v3 demo data (private local simulation keys, ledger and DB)
+/data/
+
+# v3.2 E2E harness scratch: temp signing keys, temp E2E SQLite DBs, durable
+# provider-stub recovery state. None of this is reproducible source; a clean
+# archive must not carry an unencrypted key or a leftover provider ledger.
+_tmp_*_signing_key.pem
+_tmp_autonomous_e2e.db
+_tmp_llm_e2e.db
+.recovery_stub_state.json
+
+# Local developer-generated mTLS CA, server and client key material
+/local_pki/
+/deploy/production/secrets/

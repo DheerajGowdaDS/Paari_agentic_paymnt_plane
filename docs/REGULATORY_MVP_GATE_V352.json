@@ -1,0 +1,55 @@
+{
+  "release": "Paari v3.5.2 MVP hardening",
+  "created_at_utc": "2026-10-29T06:15:17.387823+00:00",
+  "level": "A_LOCAL_SIMULATED",
+  "live_money_tested": false,
+  "beneficiary_credit_independently_verified": false,
+  "gates": {
+    "explicit_e2e_and_security": {
+      "cases": {
+        "C01": true,
+        "C02": true,
+        "C03": true,
+        "C04": true,
+        "C05": true,
+        "C06": true,
+        "C07": true,
+        "C08": true,
+        "C09": true,
+        "C10": true,
+        "C11": true,
+        "C12": true,
+        "C13": true,
+        "C14": true
+      },
+      "required_case_count": 14,
+      "all_targets_unskipped_and_passing": true,
+      "testcase_count": 27,
+      "status": "PASS",
+      "pytest_return_code": 0,
+      "output_tail": "...........................                                              [100%]\n27 passed in 22.19s\n\n"
+    },
+    "comprehensive_security_regressions": {
+      "status": "PENDING",
+      "reason": "Quick diagnostic excludes full required security matrix"
+    },
+    "postgres_provider_recovery": {
+      "status": "PENDING",
+      "reason": "Run with --with-postgres and a disposable PAARI_PG_DSN"
+    },
+    "strict_reviewed_payment_http_evidence": {
+      "status": "PENDING",
+      "reason": "Provide --paari-url --intent-id --org and PAARI_ORG_CONTROL_KEY for actual strict reviewed payment proof"
+    },
+    "uninterrupted_strict_federated_http_journey": {
+      "status": "PENDING",
+      "reason": "Requires one fresh independent HTTP sequence: source agent and user signatures, three-party agreements, SAFR reviewed release, actual provider capture/reconcile, separate receiver process, PG and verified audit without direct DB intervention. No verified composite runner exists in this package."
+    },
+    "independent_beneficiary_credit": {
+      "status": "NOT_CLAIMED",
+      "reason": "Level B requires independent beneficiary ledger/chain finality; not in Level A"
+    }
+  },
+  "level_a_verified": false,
+  "verdict": "LOCAL_MVP_NOT_YET_VERIFIED"
+}

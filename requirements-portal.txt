@@ -1,0 +1,4 @@
+# Portal-specific dependencies (in addition to requirements.txt).
+# The agent-card QR feature (GET /portal/v1/agent-cards/{id}/qr.svg) needs
+# `qrcode` with the SVG image factory; `Pillow` is not required.
+qrcode>=7.4,<9

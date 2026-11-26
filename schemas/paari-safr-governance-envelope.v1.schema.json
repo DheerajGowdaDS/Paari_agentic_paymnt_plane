@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Hand-maintained schema compatible with repository validator; cross-field payment requirements, signature integrity, UUID, timezone awareness and expiry/TTL are enforced by app.safr.envelope.GovernanceEnvelope at runtime.",
+  "additionalProperties": false,
+  "description": "Agent-signed proposal envelope; it does not itself confer spending authority.",
+  "properties": {
+    "envelope_type": {
+      "const": "paari.safr.governance-envelope",
+      "default": "paari.safr.governance-envelope",
+      "title": "Envelope Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "envelope_id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "title": "Envelope Id",
+      "type": "string"
+    },
+    "tenant_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "agent_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "parent_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "title": "Parent Id",
+      "type": "string"
+    },
+    "principal_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "title": "Principal Id",
+      "type": "string"
+    },
+    "resource_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "title": "Resource Id",
+      "type": "string"
+    },
+    "mandate_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/-]+$",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "title": "Mandate Id"
+    },
+    "action_type": {
+      "enum": [
+        "payment.execute",
+        "payment.refund",
+        "data.read",
+        "data.write",
+        "api.invoke"
+      ],
+      "title": "Action Type",
+      "type": "string"
+    },
+    "action_context": {
+      "additionalProperties": false,
+      "description": "Minimal action facts; account numbers and provider credentials do not belong here.",
+      "properties": {
+        "resource_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "operation": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "title": "Operation",
+          "type": "string"
+        },
+        "amount_minor_units": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ],
+          "default": null,
+          "title": "Amount Minor Units",
+          "maximum": 9000000000000000
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "beneficiary_ref_digest": {
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Beneficiary Ref Digest"
+        },
+        "merchant": {
+          "maxLength": 160,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Merchant"
+        },
+        "purpose": {
+          "maxLength": 240,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Purpose"
+        },
+        "provider_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Provider Id"
+        },
+        "jurisdiction": {
+          "default": "AE",
+          "pattern": "^[A-Z]{2}$",
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "request_context_digest": {
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "title": "Request Context Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_id",
+        "operation",
+        "request_context_digest"
+      ],
+      "title": "ActionContext",
+      "type": "object"
+    },
+    "trace": {
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "title": "Source System",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "parent_trace_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._:/-]+$",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "title": "Parent Trace Id"
+        },
+        "trace_digest": {
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "title": "Trace Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "source_system",
+        "sequence",
+        "trace_digest"
+      ],
+      "title": "ActionTrace",
+      "type": "object"
+    },
+    "evidence_refs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/-]+$",
+            "title": "Evidence Id",
+            "type": "string"
+          },
+          "evidence_type": {
+            "enum": [
+              "identity_attestation",
+              "kyb_attestation",
+              "mandate_signature",
+              "consent_record",
+              "provider_read",
+              "transaction_trace",
+              "screening_result",
+              "resource_grant",
+              "other"
+            ],
+            "title": "Evidence Type",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/-]+$",
+            "title": "Source",
+            "type": "string"
+          },
+          "digest": {
+            "pattern": "^[a-fA-F0-9]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "title": "Observed At"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "evidence_type",
+          "source",
+          "digest"
+        ],
+        "title": "EvidenceReference",
+        "type": "object"
+      },
+      "title": "Evidence Refs",
+      "type": "array",
+      "maxItems": 32
+    },
+    "issued_at": {
+      "format": "date-time",
+      "title": "Issued At",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "signing_key_fingerprint": {
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "title": "Signing Key Fingerprint",
+      "type": "string"
+    },
+    "action_digest": {
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "title": "Action Digest",
+      "type": "string"
+    },
+    "signature_b64": {
+      "maxLength": 256,
+      "minLength": 80,
+      "title": "Signature B64",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "agent_id",
+    "parent_id",
+    "principal_id",
+    "resource_id",
+    "action_type",
+    "action_context",
+    "trace",
+    "issued_at",
+    "expires_at",
+    "signing_key_fingerprint",
+    "action_digest",
+    "signature_b64"
+  ],
+  "title": "GovernanceEnvelope",
+  "type": "object",
+  "examples": [
+    {
+      "envelope_type": "paari.safr.governance-envelope",
+      "schema_version": "1.0",
+      "envelope_id": "123e4567-e89b-42d3-a456-426614174000",
+      "tenant_id": "org-demo",
+      "agent_id": "agent-demo",
+      "parent_id": "parent-demo",
+      "principal_id": "principal-demo",
+      "resource_id": "resource-demo",
+      "mandate_id": "mandate-demo",
+      "action_type": "payment.execute",
+      "action_context": {
+        "resource_id": "resource-demo",
+        "operation": "payment.execute",
+        "amount_minor_units": 100,
+        "currency": "INR",
+        "beneficiary_ref_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "purpose": "demo checkout",
+        "jurisdiction": "AE",
+        "request_context_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "trace": {
+        "trace_id": "trace-demo",
+        "source_system": "paari-e2e",
+        "sequence": 0,
+        "trace_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "evidence_refs": [],
+      "issued_at": "2026-10-26T08:00:00Z",
+      "expires_at": "2026-10-26T08:02:00Z",
+      "signing_key_fingerprint": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "action_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "signature_b64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  ]
+}
